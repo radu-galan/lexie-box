@@ -1,5 +1,8 @@
 import json
 import base64
+import hmac
+import hashlib
+from io import StringIO
 
 class JWT:
     
@@ -32,4 +35,43 @@ class JWT:
         payload = jwtData[1]
         signature = jwtData[2]
 
+        base64UrlSignature = hmac.new(bytes(jwtData[0] + '.' + jwtData[1], 'UTF-8'), secret.encode(), hashlib[base64Header.alg]).hexdigest()
+        if base64UrlSignature == signature:
+            base64Payload = base64.b64decode(payload)
+            if jsonDecode == True:
+                jsonDecoded = json.loads(base64Payload)
+                if jsonDecoded is not None:
+                    return jsonDecoded
+                else:
+                    return None
+            return base64Payload
+        else:
+            return False
+    
+    def getHeader(self, asJsonString = True):
+        header = {"alg": self.alg, "typ": self.type}
+
+        if asJsonString == True:
+            io = StringIO()
+            json.dump(header, io)
+            return io.getvalue()
         
+    def getPayload(self, asJsonString = True):
+        if asJsonString == True:
+            io = StringIO()
+            json.dump(self.payload, io)
+            return io.getvalue()
+        
+        return self.payload
+    
+    def getPayloadBase64(self, payload = None):
+        if payload == None:
+            payload = self.getPayload()
+        else:
+            io = StringIO()
+            json.dump(payload, io)
+            payload = io.getvalue()
+
+        return base64.b64encode(payload.encode()).decode().replace('+', '-').replace('/', '_').replace('=', '')
+        
+                    
