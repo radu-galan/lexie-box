@@ -74,4 +74,17 @@ class JWT:
 
         return base64.b64encode(payload.encode()).decode().replace('+', '-').replace('/', '_').replace('=', '')
         
-                    
+    def getHeaderBase64(self, header = None):
+        if header == None:
+            header = self.getHeader()
+        else:
+            io = StringIO()
+            json.dump(header, io)
+
+            header = io.getvalue()
+        return header.replace('+', '-').replace('/', '_').replace('=', '')
+
+    def getSignature(self, secret):
+        return hmac.new(bytes(self.getHeaderBase64() + '.' + self.getPayloadBase64(), 'UTF-8'), secret.encode(), hashlib[self.alg]).hexdigest()
+    
+    
